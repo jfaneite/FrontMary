@@ -2,54 +2,44 @@
 
 import { useEffect, useState } from "react";
 import Dashboard from "../ui/Dashboard";
-import { openDocumentStream } from "@/services/documentService";
+import {
+  HighlightsData,
+  MessageResponse,
+  openDocumentStream,
+} from "@/services/documentService";
 
-export type DocumentItem = {
+export type HighlightItem = {
   title: string;
   date: string;
   description: string;
   source: string;
   relevance: number;
-  loading: boolean;
 };
 
-export type DocumentResponse = {
-  doc_id: number;
-  response: string;
-};
-
-export type ParsedDocumentResponse = {
-  doc_id: number;
-  items: DocumentItem[];
+export type HighlightResponse = {
+  summarized: string;
+  highlights: HighlightItem[];
 };
 
 export default function DashboardContainer() {
-  const [items, setItems] = useState<DocumentItem[]>([]);
+  const [items, setItems] = useState<HighlightItem[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const parseDocumentResponse = (
-    data: DocumentResponse,
-  ): ParsedDocumentResponse => {
-    const jsonMatch = data.response?.match(/```json\n([\s\S]*?)\n```/);
-    if (!jsonMatch || jsonMatch.length < 2) {
-      throw new Error("Invalid JSON format in response");
-    }
-
-    const jsonString = jsonMatch[1];
-    const items: DocumentItem[] = JSON.parse(jsonString);
-
-    return {
-      doc_id: data.doc_id,
-      items,
-    };
-  };
+  const [summary, setSummary] = useState(null);
 
   useEffect(() => {
     openDocumentStream(
-      (data: DocumentResponse) => {
+      (data: MessageResponse) => {
         try {
-          const parsed = parseDocumentResponse(data);
-          setItems((prev) => [...prev, ...parsed.items]);
+          if (data.type === "global_summary_done") {
+            setSummary(JSON.parse(data.content));
+          } else if (data.type === "highlights") {
+            const messageContentResponse =
+              data.content as unknown as HighlightsData;
+            const highlightResponse = JSON.parse(
+              messageContentResponse.response,
+            ) as HighlightResponse;
+            setItems((prev) => [...prev, ...highlightResponse.highlights]);
+          }
         } catch (err) {
           console.error("Failed to parse response:", err);
         }
@@ -59,5 +49,5 @@ export default function DashboardContainer() {
     );
   }, []);
 
-  return <Dashboard items={items} loading={loading} />;
+  return <Dashboard items={items} loading={loading} summary={summary} />;
 }

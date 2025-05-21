@@ -1,24 +1,37 @@
-import {
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  MenuItem,
-  Select,
-  InputLabel,
-  FormControl,
-  Box,
-  CircularProgress,
-} from "@mui/material";
 import { useState, useMemo } from "react";
-import { DocumentItem } from "../containers/DashboardContainer";
+import {
+  Box,
+  Typography,
+  Select,
+  MenuItem,
+  ToggleButton,
+  ToggleButtonGroup,
+  CircularProgress,
+  Paper,
+  FormControl,
+  InputLabel,
+} from "@mui/material";
+import type { HighlightItem } from "../containers/DashboardContainer";
+import { Summary } from "./Summary";
+import { SummarySkeleton } from "./SummarySkeleton";
+import { HighlightCard } from "./HightlighCard";
+import HighlightsSkeleton from "./HighlightCardSkeleton";
 
 type Props = {
-  items: DocumentItem[];
+  items: HighlightItem[];
   loading?: boolean;
+  summary: any; // Replace with proper type if available
 };
 
-export default function Dashboard({ items, loading = false }: Props) {
+const relevanceLabels: Record<string, string> = {
+  "1": "Very Low",
+  "2": "Low",
+  "3": "Medium",
+  "4": "High",
+  "5": "Very High",
+};
+
+export default function Dashboard({ items, loading, summary }: Props) {
   const [relevance, setRelevance] = useState<string>("");
   const [source, setSource] = useState<string>("");
   const [sortDate, setSortDate] = useState<"asc" | "desc" | "">("");
@@ -48,93 +61,76 @@ export default function Dashboard({ items, loading = false }: Props) {
   const sources = [...new Set(items.map((i) => i.source))];
 
   return (
-    <Box p={4}>
-      <Typography variant="h4" gutterBottom>
-        Dashboard Test JC
-      </Typography>
-
-      {loading && <CircularProgress sx={{ mb: 2 }} />}
-
-      {/* Filters */}
-      <Box display="flex" gap={2} mb={4}>
-        <FormControl sx={{ minWidth: 120 }}>
-          <InputLabel>Relevance</InputLabel>
-          <Select
-            value={relevance}
-            label="Relevance"
-            onChange={(e) =>
-              setRelevance(e.target.value === "" ? "" : e.target.value)
-            }
-          >
-            <MenuItem value="">All</MenuItem>
-            {["5", "4", "3", "2", "1"].map((r) => (
-              <MenuItem key={r} value={r}>
-                {r}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <FormControl sx={{ minWidth: 100 }}>
-          <InputLabel>Source</InputLabel>
-          <Select
-            value={source}
-            label="Source"
-            onChange={(e) => setSource(e.target.value)}
-          >
-            <MenuItem value="">All</MenuItem>
-            {sources.map((s) => (
-              <MenuItem key={s} value={s}>
-                {s}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <FormControl sx={{ minWidth: 140 }}>
-          <InputLabel>Sort by Date</InputLabel>
-          <Select
-            value={sortDate}
-            label="Sort by Date"
-            onChange={(e) => setSortDate(e.target.value as "asc" | "desc" | "")}
-          >
-            <MenuItem value="">None</MenuItem>
-            <MenuItem value="asc">Oldest</MenuItem>
-            <MenuItem value="desc">Newest</MenuItem>
-          </Select>
-        </FormControl>
+    <Box
+      display="flex"
+      height="100vh"
+      overflow="hidden"
+      sx={{
+        p: 2,
+        mb: 2,
+        borderRadius: 2,
+        backgroundColor: "#fafafa",
+        border: "1px solid rgba(0, 0, 0, 0.12)",
+        margin: "20px",
+      }}
+    >
+      <Box width="50%" p={4} overflow="auto" borderRight="1px solid #e0e0e0">
+        {summary ? <Summary {...summary} /> : <SummarySkeleton />}
       </Box>
 
-      <Grid container spacing={2}>
-        {filteredItems.map((item, idx) => (
-          <Card
-            key={idx}
-            variant="outlined"
-            sx={{
-              height: "100%",
-              display: "flex",
-              flexDirection: "column",
-              width: "100%",
-            }}
+      <Box width="50%" p={4} overflow="auto">
+        <Box display="flex" gap={2} mb={3} flexWrap="wrap">
+          <FormControl size="small" sx={{ minWidth: 160 }}>
+            <InputLabel>Relevance</InputLabel>
+            <Select
+              label="Relevance"
+              value={relevance}
+              onChange={(e) => setRelevance(e.target.value)}
+            >
+              <MenuItem value="">All</MenuItem>
+              {Object.entries(relevanceLabels).map(([val, label]) => (
+                <MenuItem key={val} value={val}>
+                  {label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl size="small" sx={{ minWidth: 160 }}>
+            <InputLabel>Source</InputLabel>
+            <Select
+              label="Source"
+              value={source}
+              onChange={(e) => setSource(e.target.value)}
+            >
+              <MenuItem value="">All</MenuItem>
+              {sources.map((s) => (
+                <MenuItem key={s} value={s}>
+                  {s}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <ToggleButtonGroup
+            size="small"
+            exclusive
+            value={sortDate}
+            onChange={(_, val) => setSortDate(val)}
+            sx={{ ml: "auto" }}
           >
-            <CardContent sx={{ flexGrow: 1 }}>
-              <Typography variant="h6">{item.title}</Typography>
-              <Typography variant="body2" color="text.secondary">
-                {item.date}
-              </Typography>
-              <Typography variant="body1" sx={{ my: 1 }}>
-                {item.description}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Source: {item.source}
-              </Typography>
-              <Typography variant="caption" display="block">
-                Relevance: {item.relevance}
-              </Typography>
-            </CardContent>
-          </Card>
-        ))}
-      </Grid>
+            <ToggleButton value="">No Sort</ToggleButton>
+            <ToggleButton value="asc">Date ↑</ToggleButton>
+            <ToggleButton value="desc">Date ↓</ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
+
+        {loading ? (
+          <HighlightsSkeleton />
+        ) : (
+          <HighlightCard highlights={filteredItems} />
+        )}
+      </Box>
     </Box>
   );
 }

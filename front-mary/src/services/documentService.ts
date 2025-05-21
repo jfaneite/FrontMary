@@ -1,14 +1,19 @@
-type StreamedData = {
+export type HighlightsData = {
   doc_id: number;
   response: string;
 };
 
 type DoneSignal = { done: true };
 
-type Message = StreamedData | DoneSignal;
+export type MessageResponse = {
+  type: string;
+  content: string;
+};
+
+export type Message = MessageResponse | DoneSignal;
 
 export function openDocumentStream(
-  onData: (data: StreamedData) => void,
+  onData: (data: MessageResponse) => void,
   onDone: () => void,
   onError?: (err: Event) => void,
 ): void {
