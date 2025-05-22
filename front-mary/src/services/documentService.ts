@@ -14,7 +14,6 @@ export type Message = MessageResponse | DoneSignal;
 
 export function openDocumentStream(
   onData: (data: MessageResponse) => void,
-  onDone: () => void,
   onError?: (err: Event) => void,
 ): void {
   const ws = new WebSocket("wss://backmary.onrender.com");
@@ -51,7 +50,6 @@ export function openDocumentStream(
     if ("done" in message) {
       console.log("✅ Done signal received, closing WebSocket");
       ws.close();
-      onDone();
     } else {
       onData(message);
     }

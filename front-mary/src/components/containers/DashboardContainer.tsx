@@ -7,6 +7,7 @@ import {
   MessageResponse,
   openDocumentStream,
 } from "@/services/documentService";
+import { SummaryProps } from "../ui/Summary";
 
 export type HighlightItem = {
   title: string;
@@ -23,8 +24,7 @@ export type HighlightResponse = {
 
 export default function DashboardContainer() {
   const [items, setItems] = useState<HighlightItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [summary, setSummary] = useState(null);
+  const [summary, setSummary] = useState<SummaryProps | undefined>(undefined);
 
   useEffect(() => {
     openDocumentStream(
@@ -44,10 +44,9 @@ export default function DashboardContainer() {
           console.error("Failed to parse response:", err);
         }
       },
-      () => setLoading(false),
       (err) => console.error("WebSocket error:", err),
     );
   }, []);
 
-  return <Dashboard items={items} loading={loading} summary={summary} />;
+  return <Dashboard items={items} summary={summary} />;
 }

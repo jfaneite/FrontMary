@@ -1,26 +1,22 @@
 import { useState, useMemo } from "react";
 import {
   Box,
-  Typography,
   Select,
   MenuItem,
   ToggleButton,
   ToggleButtonGroup,
-  CircularProgress,
-  Paper,
   FormControl,
   InputLabel,
 } from "@mui/material";
 import type { HighlightItem } from "../containers/DashboardContainer";
-import { Summary } from "./Summary";
+import { Summary, SummaryProps } from "./Summary";
 import { SummarySkeleton } from "./SummarySkeleton";
 import { HighlightCard } from "./HightlighCard";
 import HighlightsSkeleton from "./HighlightCardSkeleton";
 
 type Props = {
   items: HighlightItem[];
-  loading?: boolean;
-  summary: any; // Replace with proper type if available
+  summary?: SummaryProps;
 };
 
 const relevanceLabels: Record<string, string> = {
@@ -31,7 +27,7 @@ const relevanceLabels: Record<string, string> = {
   "5": "Very High",
 };
 
-export default function Dashboard({ items, loading, summary }: Props) {
+export default function Dashboard({ items, summary }: Props) {
   const [relevance, setRelevance] = useState<string>("");
   const [source, setSource] = useState<string>("");
   const [sortDate, setSortDate] = useState<"asc" | "desc" | "">("");
@@ -125,10 +121,10 @@ export default function Dashboard({ items, loading, summary }: Props) {
           </ToggleButtonGroup>
         </Box>
 
-        {loading ? (
-          <HighlightsSkeleton />
-        ) : (
+        {items ? (
           <HighlightCard highlights={filteredItems} />
+        ) : (
+          <HighlightsSkeleton />
         )}
       </Box>
     </Box>
