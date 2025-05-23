@@ -1,3 +1,6 @@
+const wsBackendUrl = process.env.NEXT_PUBLIC_WS_BACKEND_URL;
+const httpBackendUrl = process.env.NEXT_PUBLIC_HTTP_BACKEND_URL;
+
 export type HighlightsData = {
   doc_id: number;
   response: string;
@@ -16,13 +19,13 @@ export function openDocumentStream(
   onData: (data: MessageResponse) => void,
   onError?: (err: Event) => void,
 ): void {
-  const ws = new WebSocket("wss://backmary.onrender.com");
+  const ws = new WebSocket(`${wsBackendUrl}`);
 
   ws.onopen = async () => {
     console.log("✅ WebSocket connected");
 
     try {
-      const res = await fetch("https://backmary.onrender.com/documents", {
+      const res = await fetch(`${httpBackendUrl}/documents`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
