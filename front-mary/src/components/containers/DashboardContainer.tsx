@@ -2,12 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Dashboard from "../ui/Dashboard";
-import {
-  HighlightsData,
-  MessageResponse,
-  openDocumentStream,
-} from "@/services/documentService";
 import { SummaryProps } from "../ui/Summary";
+import React from "react";
+import { HighlightsData, MessageResponse, openDocumentStream } from "../../services/documentService";
 
 export type HighlightItem = {
   title: string;
@@ -18,7 +15,7 @@ export type HighlightItem = {
 };
 
 export type HighlightResponse = {
-  summarized: string;
+  summarize: string;
   highlights: HighlightItem[];
 };
 
@@ -35,9 +32,11 @@ export default function DashboardContainer() {
           } else if (data.type === "highlights") {
             const messageContentResponse =
               data.content as unknown as HighlightsData;
+
             const highlightResponse = JSON.parse(
               messageContentResponse.response,
             ) as HighlightResponse;
+
             setItems((prev) => [...prev, ...highlightResponse.highlights]);
           }
         } catch (err) {

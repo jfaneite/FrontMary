@@ -1,5 +1,6 @@
 import { Paper, Typography } from "@mui/material";
 import { HighlightItem } from "../containers/DashboardContainer";
+import React from "react";
 
 export type HighlightProp = {
   highlights: HighlightItem[];

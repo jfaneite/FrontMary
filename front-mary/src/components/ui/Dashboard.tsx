@@ -7,6 +7,7 @@ import {
   ToggleButtonGroup,
   FormControl,
   InputLabel,
+  Typography,
 } from "@mui/material";
 import type { HighlightItem } from "../containers/DashboardContainer";
 import { Summary, SummaryProps } from "./Summary";
@@ -59,7 +60,7 @@ export default function Dashboard({ items, summary }: Props) {
   return (
     <Box
       display="flex"
-      height="100vh"
+      height="95vh"
       overflow="hidden"
       sx={{
         p: 2,
@@ -74,7 +75,10 @@ export default function Dashboard({ items, summary }: Props) {
         {summary ? <Summary {...summary} /> : <SummarySkeleton />}
       </Box>
 
-      <Box width="50%" p={4} overflow="auto">
+      <Box width="50%" p={4}>
+        <Typography variant="h6" fontWeight="bold" gutterBottom>
+          Highlights
+        </Typography>
         <Box display="flex" gap={2} mb={3} flexWrap="wrap">
           <FormControl size="small" sx={{ minWidth: 160 }}>
             <InputLabel>Relevance</InputLabel>
@@ -121,11 +125,13 @@ export default function Dashboard({ items, summary }: Props) {
           </ToggleButtonGroup>
         </Box>
 
-        {items ? (
-          <HighlightCard highlights={filteredItems} />
-        ) : (
-          <HighlightsSkeleton />
-        )}
+        <Box overflow="auto" height="80vh">
+          {items && items.length > 0 ? (
+            <HighlightCard highlights={filteredItems} />
+          ) : (
+            <HighlightsSkeleton />
+          )}
+        </Box>
       </Box>
     </Box>
   );
